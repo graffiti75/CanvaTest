@@ -14,6 +14,7 @@ public class Globals extends AppCompatActivity {
      * Webservice.
      */
 
+//    public static final String BASE_URL = "http://192.168.0.5:8765/color/";
     public static final String BASE_URL = "http://10.0.2.2:8765/color/";
 
     /**
