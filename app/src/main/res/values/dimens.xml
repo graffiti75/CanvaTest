@@ -1,5 +1,21 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <!-- Common -->
+
+    <dimen name="text_size_normal">16sp</dimen>
+    <dimen name="title__text_size">24sp</dimen>
+    <dimen name="common__text_size">20sp</dimen>
+    <dimen name="color_picker_item__image_size">30dp</dimen>
+
+    <!-- Main Activity -->
+
+    <dimen name="activity_main__text_size">40sp</dimen>
+
+    <!-- Input Options Activity -->
+
+    <dimen name="activity_input_options__image_size">30dp</dimen>
+
+    <!-- TelePrompter Activity -->
+
+    <dimen name="activity_tele_prompter__color_palette_height">40dp</dimen>
+    <dimen name="activity_tele_prompter__seek_bar_height">40dp</dimen>
 </resources>

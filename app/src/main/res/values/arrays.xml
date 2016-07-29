@@ -1,0 +1,11 @@
+<resources>
+    <!-- DATABASE ARRAYS -->
+
+    <string-array name="array_list__pixel_size">
+        <item>8</item>
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
+    </string-array>
+</resources>

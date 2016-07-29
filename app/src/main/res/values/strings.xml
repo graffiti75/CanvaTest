@@ -1,3 +1,16 @@
 <resources>
+    <!-- Application -->
+
     <string name="app_name">CanvaTest</string>
+
+    <!-- Main Activity -->
+
+    <string name="activity_main__sd_card_option">Choose image from sd card</string>
+    <string name="activity_main__pixel_size_option">Choose the pixel size</string>
+    <string name="activity_main__icon_content_description">Open file chooser</string>
+
+    <string name="activity_main__choose_tile_size">Choose the tile size</string>
+    <string name="activity_main__error_reading_file">No file chosen.</string>
+    <string name="activity_main__select_image">Select a image</string>
+    <string name="activity_main__install_file_manager">Please install a File Manager.</string>
 </resources>
