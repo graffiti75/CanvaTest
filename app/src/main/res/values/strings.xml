@@ -2,10 +2,13 @@
     <!-- Application -->
 
     <string name="app_name">CanvaTest</string>
+    <string name="dialog__lost_connection_title">Connection lost</string>
+    <string name="dialog__lost_connection_message">Internet connection lost. Try again later.</string>
+    <string name="dialog__ok">Ok</string>
 
     <!-- Main Activity -->
 
-    <string name="activity_main__sd_card_option">Choose image from sd card</string>
+    <string name="activity_main__sd_card_option">Choose image</string>
     <string name="activity_main__pixel_size_option">Choose the pixel size</string>
     <string name="activity_main__icon_content_description">Open file chooser</string>
 

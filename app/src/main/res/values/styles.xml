@@ -5,7 +5,6 @@
     <!-- APPLICATION THEME -->
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!--<style name="AppTheme" parent="AppTheme.Base.AppCompat.Light.DarkActionBar">-->
         <!-- Your app branding color for the app bar -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <!-- Darker variant for the status bar and contextual app bars -->
@@ -22,10 +21,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
         <item name="android:actionOverflowButtonStyle">@style/Widget.ActionButton.Overflow</item>
-
-        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <!-- TOOLBAR -->
@@ -60,11 +56,19 @@
         <item name="android:orientation">vertical</item>
     </style>
 
-    <style name="CardViewSeparatorStyle">
+    <style name="VerticalCardViewSeparatorStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:layout_marginBottom">10dp</item>
         <item name="android:layout_marginTop">10dp</item>
+        <item name="android:background">@color/grey_300</item>
+    </style>
+
+    <style name="HorizontalCardViewSeparatorStyle">
+        <item name="android:layout_width">2dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
         <item name="android:background">@color/grey_300</item>
     </style>
 

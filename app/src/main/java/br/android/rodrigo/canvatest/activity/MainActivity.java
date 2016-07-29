@@ -57,6 +57,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
+    /**
+     * Saved Instance State.
+     */
+
+    public static final String TILE_SIZE_SAVED_INSTANCE = "tile_size_saved_instance";
+    public static final String FILE_PATH_SAVED_INSTANCE = "file_path_saved_instance";
+
     //--------------------------------------------------
     // Attributes
     //--------------------------------------------------
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSavedInstanceState(savedInstanceState);
         changeStatusBar();
         setLayout();
     }
@@ -115,6 +123,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(TILE_SIZE_SAVED_INSTANCE, mTileSize);
+        outState.putString(FILE_PATH_SAVED_INSTANCE, mFilePath);
+    }
+
     //--------------------------------------------------
     // Menu
     //--------------------------------------------------
@@ -131,13 +146,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Integer id = menuItem.getItemId();
         switch (id) {
             case R.id.id_menu_tile:
-                if (!Utils.isEmpty(mFilePath)) {
-                    ContentManager.getInstance().setSourceBitmap(mSourceBitmap);
-                    ActivityUtils.startActivityExtras(mActivity, TileActivity.class,
-                        Globals.TILE_SIZE_EXTRA, mTileSize);
+                // Checks connection.
+                if (!Utils.hasConnection(mActivity)) {
+                    Utils.callLostConnectionDialog(mActivity);
                 } else {
-                    Toast.makeText(mActivity, getString(R.string.activity_main__error_reading_file),
-                        Toast.LENGTH_SHORT).show();
+                    if (!Utils.isEmpty(mFilePath)) {
+                        ContentManager.getInstance().setSourceBitmap(mSourceBitmap);
+                        ActivityUtils.startActivityExtras(mActivity, TileActivity.class,
+                            Globals.TILE_SIZE_EXTRA, mTileSize);
+                    } else {
+                        Toast.makeText(mActivity, getString(R.string.activity_main__error_reading_file),
+                            Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
         }
@@ -147,6 +167,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
+
+    private void getSavedInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            mTileSize = savedInstanceState.getInt(TILE_SIZE_SAVED_INSTANCE);
+            mFilePath = savedInstanceState.getString(FILE_PATH_SAVED_INSTANCE);
+            if (!Utils.isEmpty(mFilePath)) {
+                mPhotoImageView = (ImageView) findViewById(R.id.id_activity_main__photo_image_view);
+                mPhotoImageView.setVisibility(View.VISIBLE);
+                Bitmap bitmap = BitmapFactory.decodeFile(mFilePath);
+                mSourceBitmap = bitmap;
+                mPhotoImageView.setImageBitmap(bitmap);
+            }
+        }
+    }
 
     private void changeStatusBar() {
         ColorUtils.changeStatusBar(mActivity, getWindow(), R.color.teal_500);

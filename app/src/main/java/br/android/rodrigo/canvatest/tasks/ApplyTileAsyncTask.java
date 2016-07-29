@@ -18,6 +18,7 @@ import java.util.List;
 
 import br.android.rodrigo.canvatest.Globals;
 import br.android.rodrigo.canvatest.model.Tile;
+import br.android.rodrigo.canvatest.utils.Utils;
 
 /**
  * AverageColorAsyncTask.java.
@@ -52,8 +53,12 @@ public class ApplyTileAsyncTask extends AsyncTask<Object, Void, Integer> {
         mPhotoImageView = (ImageView)params[4];
 
         // Apply tiles.
-        List<Tile> tiles = getTiles();
-        mergeImages(tiles, mSourceBitmap);
+        if (!Utils.hasConnection(mActivity)) {
+            Utils.callLostConnectionDialog(mActivity);
+        } else {
+            List<Tile> tiles = getTiles();
+            mergeImages(tiles, mSourceBitmap);
+        }
 
         return 0;
     }
