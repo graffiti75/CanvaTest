@@ -13,4 +13,10 @@
     <string name="activity_main__error_reading_file">No file chosen.</string>
     <string name="activity_main__select_image">Select a image</string>
     <string name="activity_main__install_file_manager">Please install a File Manager.</string>
+
+    <string name="menu_main__tile">Apply Tiles</string>
+
+    <!-- Title Activity -->
+
+    <string name="activity_tile__title">Tiled Image</string>
 </resources>

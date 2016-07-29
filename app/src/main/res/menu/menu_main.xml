@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/id_menu_tile"
+        android:icon="@mipmap/ic_play_arrow_black_48dp"
+        android:title="@string/menu_main__tile"
+        app:showAsAction="always" />
+</menu>

@@ -1,18 +1,21 @@
 package br.android.rodrigo.canvatest.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -21,23 +24,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
+import br.android.rodrigo.canvatest.ContentManager;
+import br.android.rodrigo.canvatest.Globals;
 import br.android.rodrigo.canvatest.R;
-import br.android.rodrigo.canvatest.model.Tile;
-import br.android.rodrigo.canvatest.tasks.AverageColorAsyncTask;
+import br.android.rodrigo.canvatest.utils.ActivityUtils;
+import br.android.rodrigo.canvatest.utils.ColorUtils;
 import br.android.rodrigo.canvatest.utils.FileUtils;
+import br.android.rodrigo.canvatest.utils.Utils;
 
 /**
  * MainActivity.java.
@@ -63,12 +57,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
-    /**
-     * Webservice.
-     */
-
-    private static final String BASE_URL = "http://10.0.2.2:8765/color/";
-
     //--------------------------------------------------
     // Attributes
     //--------------------------------------------------
@@ -77,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Contexts.
      */
 
-    private MainActivity mActivity = MainActivity.this;
+    private Activity mActivity = MainActivity.this;
 
     /**
      * Layout.
@@ -87,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView mFileImageView;
     private TextView mPixelSizeLabelTextView;
     private TextView mPixelSizeTextView;
-    private CardView mImageCardView;
     private ImageView mPhotoImageView;
 
     /**
@@ -97,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Integer mTileSize = 32;
     private String mFilePath = "";
     private Intent mIntentData = null;
+    private Bitmap mSourceBitmap;
 
     //--------------------------------------------------
     // Activity Life Cycle
@@ -107,10 +95,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        changeStatusBar();
         setLayout();
-        List<Tile> tiles = getTiles();
-        Bitmap source = BitmapFactory.decodeResource(getResources(), R.drawable.baby);
-        mergeImages(tiles, source);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -120,18 +106,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mIntentData = data;
                 checkPermissions();
             } else {
-                Toast.makeText(this, getString(R.string.activity_main__error_reading_file),
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(mActivity, getString(R.string.activity_main__error_reading_file),
+                    Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, getString(R.string.activity_main__error_reading_file),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, getString(R.string.activity_main__error_reading_file),
+                Toast.LENGTH_SHORT).show();
         }
+    }
+
+    //--------------------------------------------------
+    // Menu
+    //--------------------------------------------------
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        Integer id = menuItem.getItemId();
+        switch (id) {
+            case R.id.id_menu_tile:
+                if (!Utils.isEmpty(mFilePath)) {
+                    ContentManager.getInstance().setSourceBitmap(mSourceBitmap);
+                    ActivityUtils.startActivityExtras(mActivity, TileActivity.class,
+                        Globals.TILE_SIZE_EXTRA, mTileSize);
+                } else {
+                    Toast.makeText(mActivity, getString(R.string.activity_main__error_reading_file),
+                        Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+        return false;
     }
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
+
+    private void changeStatusBar() {
+        ColorUtils.changeStatusBar(mActivity, getWindow(), R.color.teal_500);
+        initToolbar(R.color.teal_500, false);
+        getSupportActionBar().setTitle(R.string.app_name);
+    }
+
+    private void initToolbar(int colorId, Boolean homeEnabled) {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.id_toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(homeEnabled);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(mActivity, colorId)));
+        }
+    }
 
     private void setLayout() {
         mFileLabelTextView = (TextView) findViewById(R.id.id_activity_main__file_label_text_view);
@@ -147,34 +177,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mPixelSizeTextView.setOnClickListener(this);
         mPixelSizeTextView.setText(mTileSize.toString());
 
-        mImageCardView = (CardView) findViewById(R.id.id_activity_main__image_card_view);
         mPhotoImageView = (ImageView) findViewById(R.id.id_activity_main__photo_image_view);
     }
 
-    private void downloadImage(final List<Tile> tiles, final Integer current, String url,
-        final Tile item, final Bitmap result, final Canvas comboImage) {
-        Glide.with(this).load(url).asBitmap().into(new SimpleTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                // Gets the bitmap.
-                if (resource != null) {
-                    // Draws the image.
-                    Bitmap transparent = resource;
-                    Bitmap bitmap = overlay(item.getBitmap(), transparent);
-                    comboImage.drawBitmap(bitmap, item.getX(), item.getY(), null);
-
-                    // Display for the user.
-                    if (current == (tiles.size() - 1)) {
-                        ImageView photoImageView = (ImageView) findViewById(R.id.id_activity_main__photo_image_view);
-                        photoImageView.setImageBitmap(result);
-                    }
-                }
-            }
-        });
-    }
-
     private void callTextFontListDialog() {
-        new MaterialDialog.Builder(this).title(R.string.activity_main__choose_tile_size)
+        new MaterialDialog.Builder(mActivity).title(R.string.activity_main__choose_tile_size)
                 .items(R.array.array_list__pixel_size).itemsCallback(new MaterialDialog.ListCallback() {
             @Override
             public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
@@ -182,66 +189,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mPixelSizeTextView.setText(text);
             }
         }).show();
-    }
-
-    //--------------------------------------------------
-    // Bitmap Methods
-    //--------------------------------------------------
-
-    private void mergeImages(final List<Tile> tiles, Bitmap source) {
-        int width = source.getWidth(), height = source.getHeight();
-        final Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        final Canvas comboImage = new Canvas(result);
-        final String url = BASE_URL + mTileSize + "/" + mTileSize + "/";
-
-        for (int i = 0; i < tiles.size(); i++) {
-            final Tile item = tiles.get(i);
-            final int current = i;
-            AverageColorAsyncTask task = new AverageColorAsyncTask() {
-                @Override
-                protected void onPostExecute(String color) {
-                    downloadImage(tiles, current, url + color, item, result, comboImage);
-                }
-            };
-            task.execute(item.getBitmap());
-        }
-    }
-
-    private Bitmap overlay(Bitmap bitmap1, Bitmap bitmap2) {
-        Bitmap bmOverlay = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
-        Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(bitmap1, new Matrix(), null);
-        canvas.drawBitmap(bitmap2, 0, 0, null);
-        return bmOverlay;
-    }
-
-    private List<Tile> getTiles() {
-        List<Tile> tiles = new ArrayList<>();
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.lili);
-        Integer screenWidth = image.getWidth();
-        Integer screenHeight = image.getHeight();
-
-        for (int i = 0; i < screenHeight; i += mTileSize) {
-            for (int j = 0; j < screenWidth; j += mTileSize) {
-                // Current row.
-                Integer currentY = i;
-                Integer height = mTileSize;
-                if (i + mTileSize > screenHeight) {
-                    height = screenHeight - i;
-                }
-
-                // Current column.
-                Integer currentX = j;
-                Integer width = mTileSize;
-                if (j + mTileSize > screenWidth) {
-                    width = screenWidth - j;
-                }
-                Bitmap bitmap = Bitmap.createBitmap(image, currentX, currentY, width, height);
-                Tile tile = new Tile(currentX, currentY, width, height, bitmap);
-                tiles.add(tile);
-            }
-        }
-        return tiles;
     }
 
     //--------------------------------------------------
@@ -258,27 +205,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 FILE_SELECT_CODE);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog.
-            Toast.makeText(this, getString(R.string.activity_main__install_file_manager), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, getString(R.string.activity_main__install_file_manager), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public static String readFromFile(String fileName) {
-        String buffer = "";
-        try {
-            File file = new File(fileName);
-            FileInputStream fileInputStream = new FileInputStream(file);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-            String data;
-            while ((data = bufferedReader.readLine()) != null) {
-                buffer += data;
-            }
-            bufferedReader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return buffer;
     }
 
     private void getFileContentFromIntent(Intent data) {
@@ -286,14 +214,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Uri uri = data.getData();
             mFilePath = FileUtils.getPath(mActivity, uri);
         }
-        Glide.with(mActivity).load(mFilePath).into(mPhotoImageView);
-        mImageCardView.setVisibility(View.VISIBLE);
-        mPhotoImageView.setVisibility(View.VISIBLE);
-    }
 
-    private void openFileActivity() {
-//        ActivityUtils.startActivityTransition(mActivity, FileActivity.class,
-//            R.id.id_activity_input_options__file_image_view, R.string.input_file__transition);
+        mPhotoImageView.setVisibility(View.VISIBLE);
+        Bitmap bitmap = BitmapFactory.decodeFile(mFilePath);
+        mSourceBitmap = bitmap;
+        mPhotoImageView.setImageBitmap(bitmap);
     }
 
     //--------------------------------------------------

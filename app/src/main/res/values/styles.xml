@@ -60,6 +60,14 @@
         <item name="android:orientation">vertical</item>
     </style>
 
+    <style name="CardViewSeparatorStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:background">@color/grey_300</item>
+    </style>
+
     <style name="CommonTextSizeStyle">
         <item name="android:textSize">@dimen/common__text_size</item>
     </style>
